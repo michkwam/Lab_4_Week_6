@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "87922359087",
+    "project_id": "the-dashboard-cbe7d",
+    "storage_bucket": "the-dashboard-cbe7d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:87922359087:android:f3632f512c433079d2bfda",
+        "android_client_info": {
+          "package_name": "com.example.leedstrinity.lab_4_week_6"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC46CZC7Yz5FsYz4GV2A9VlwXhB5XCAXiA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
