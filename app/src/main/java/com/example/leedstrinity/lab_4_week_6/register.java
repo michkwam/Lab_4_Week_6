@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -13,9 +14,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.AuthResult;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class register extends AppCompatActivity {
 
@@ -24,6 +34,7 @@ public class register extends AppCompatActivity {
     private Button registerBtn;
     private ProgressBar progressbar;
     private FirebaseAuth mAuth;
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,7 +42,6 @@ public class register extends AppCompatActivity {
         setContentView(R.layout.activity_register);
 
         mAuth = FirebaseAuth.getInstance();
-
         fullName = findViewById(R.id.fullName);
         regEmail = findViewById(R.id.register_email);
         regPassword = findViewById(R.id.register_password);
@@ -57,19 +67,16 @@ public class register extends AppCompatActivity {
             }
         });
 
-
     }
 
 
     private void registerUser(){
 
         String name, email, password, phone;
-        name = fullName.getText().toString();
-        email = regEmail.getText().toString();
-        password = regPassword.getText().toString();
-        phone = regPhone.getText().toString();
-
-        progressbar.setVisibility(View.VISIBLE);
+        name = fullName.getText().toString().trim();
+        email = regEmail.getText().toString().trim();
+        password = regPassword.getText().toString().trim();
+        phone = regPhone.getText().toString().trim();
 
         if (name.isEmpty()) {
             fullName.setError("Name is required");
@@ -101,15 +108,41 @@ public class register extends AppCompatActivity {
                             Toast.makeText(getApplicationContext(), "Account " + email + " Registed!", Toast.LENGTH_LONG).show();
                             progressbar.setVisibility(View.GONE);
 
-                            Intent loginPage = new Intent(register.this, MainActivity.class);
-                            startActivity(loginPage);
+                            String userID = mAuth.getCurrentUser().getUid();
+                            DocumentReference documentReference = db.collection("user").document(userID);
+
+
+                            Map<String, Object> user = new HashMap<>();
+
+                            //insert data using user Collection using put method
+                            user.put("fName", name);
+                            user.put("email", email);
+                            user.put("phone", phone);
+
+                            documentReference.set(user).
+                                    addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+                                            Toast.makeText(register.this, "User Stored", Toast.LENGTH_SHORT).show();
+                                            Intent mainPage = new Intent(register.this, MainActivity.class);
+                                            startActivity(mainPage);
+                                            //Log.d( "TAG", "OnSucces: user profile is created for " + userID);
+                                        }
+                                    }).addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            Toast.makeText(register.this, "User Not Stored", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
                         } else {
-                            Toast.makeText(getApplicationContext(), "Unsuccessful registration! Check your credentials." , Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), "Unsuccessful registration! Check your credentials.", Toast.LENGTH_LONG).show();
                             progressbar.setVisibility(View.GONE);
                         }
                     }
                 }
         );
+
+
 
     }
 
